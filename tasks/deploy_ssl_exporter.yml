@@ -1,0 +1,34 @@
+---
+- name: "ssl_exporter | Deploy ssl_exporter modules"
+  ansible.builtin.template:
+    src: "ssl_exporter.yml.j2"
+    dest: "{{ vars['ssl_exporter_dest'] + '/ssl_exporter.yaml' }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  notify:
+    - "Restart ssl_exporter"
+- name: "ssl_exporter | Deploy ssl_exporter service configuration"
+  ansible.builtin.template:
+    src: "ssl_exporter.service.j2"
+    dest: "{{ '/etc/systemd/system/' + vars['ssl_exporter_service'] +
+      '.service' }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  notify:
+    - "Daemon reload"
+    - "Restart ssl_exporter"
+- name: "ssl_exporter | Enable ssl_exporter"
+  ansible.builtin.systemd:
+    name: "{{ vars['ssl_exporter_service'] }}"
+    enabled: "yes"
+  when:
+    - "hostvars[inventory_hostname]['ssl_exporter'] is defined"
+    - "hostvars[inventory_hostname]['ssl_exporter'] != ''"
+    - "hostvars[inventory_hostname]['ssl_exporter'] |
+       community.general.json_query(vars['ssl_exporter_enable']) is defined"
+    - "hostvars[inventory_hostname]['ssl_exporter'] |
+       community.general.json_query(vars['ssl_exporter_enable']) == 'true'"
+  vars:
+    ssl_exporter_enable: "[] | map(&enable || 'false', @) | [0]"

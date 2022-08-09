@@ -1,0 +1,34 @@
+---
+- name: "ssl_exporter | Assert that system manager is systemd"
+  assert:
+    that:
+      - "hostvars[inventory_hostname]['ansible_service_mgr'] == 'systemd'"
+    msg: "System manager is not systemd"
+    quiet: "true"
+- name: "ssl_exporter | Set facts about ssl_exporter role"
+  ansible.builtin.set_fact:
+    ssl_exporter_version: "{{ hostvars[inventory_hostname]['ssl_exporter'] |
+      community.general.json_query('[].version | [0]') | default(omit) }}"
+    ssl_exporter_settings: "{{ hostvars[inventory_hostname]['ssl_exporter'] |
+      community.general.json_query('[].settings[] | [0]') | default(omit) }}"
+- name: "ssl_exporter | Get last release version from Github"
+  community.general.github_release:
+    user: "ribbybibby"
+    repo: "ssl_exporter"
+    action: "latest_release"
+  register: "ssl_exporter_version_tag"
+  delegate_to: "localhost"
+  when:
+    - "vars['ssl_exporter_version'] is defined"
+    - "vars['ssl_exporter_version'] == 'latest'"
+- name: "ssl_exporter | Set facts about ssl_exporter role"
+  ansible.builtin.set_fact:
+    ssl_exporter_version:
+      "{{ vars['ssl_exporter_version_tag']['tag'][1:] }}"
+- name: "ssl_exporter | Create ssl_exporter catalog"
+  ansible.builtin.file:
+    path: "{{ vars['ssl_exporter_dest'] }}"
+    state: "directory"
+    owner: "root"
+    group: "root"
+    mode: "0755"

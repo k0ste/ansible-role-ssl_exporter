@@ -1,0 +1,18 @@
+{{ '## ' + 'ssl_exporter.service' }}
+{{ '# ' + ansible_managed }}
+{{ '# ' + 'Do not edit manually' }}
+
+{{ '[Unit]' }}
+{{ 'Description=ssl_exporter' }}
+{{ 'After=network.target' }}
+{{ 'Wants=network.target' }}
+
+{{ '[Service]' }}
+{{ 'Type=simple' }}
+{{ 'User=nobody' }}
+{{ 'Group=nobody' }}
+{{ 'ExecStart=' + vars['ssl_exporter_dest'] + '/ssl_exporter --log.level=debug \
+--config.file=' + vars['ssl_exporter_dest'] + '/ssl_exporter.yaml' }}
+
+{{ '[Install]' }}
+{{ 'WantedBy=multi-user.target' }}
