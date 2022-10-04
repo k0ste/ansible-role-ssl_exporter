@@ -5,6 +5,9 @@
       - "hostvars[inventory_hostname]['ansible_service_mgr'] == 'systemd'"
     msg: "System manager is not systemd"
     quiet: "true"
+- name: "ssl_exporter | Add the OS specific varibles"
+  ansible.builtin.include_vars:
+    file: "{{ hostvars[inventory_hostname]['ansible_os_family'] + '.yml' }}"
 - name: "ssl_exporter | Set facts about ssl_exporter role"
   ansible.builtin.set_fact:
     ssl_exporter_version: "{{ hostvars[inventory_hostname]['ssl_exporter'] |

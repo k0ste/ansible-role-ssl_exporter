@@ -2,6 +2,8 @@
 - ansible.builtin.import_tasks:
     file: "pre_requisite.yml"
 - ansible.builtin.import_tasks:
+    file: "packages.yml"
+- ansible.builtin.import_tasks:
     file: "download.yml"
 - ansible.builtin.include_tasks:
     file: "deploy_ssl_exporter.yml"
