@@ -19,6 +19,7 @@
     user: "ribbybibby"
     repo: "ssl_exporter"
     action: "latest_release"
+  run_once: "true"
   register: "ssl_exporter_version_tag"
   delegate_to: "localhost"
   when:
