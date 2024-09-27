@@ -1,34 +1,21 @@
 ---
 - name: "ssl_exporter | Install the required packages in Redhat derivatives"
-  block:
-  - name: "ssl_exporter | Install the required packages for RedHat via yum"
-    ansible.builtin.yum:
-      name: "{{ hostvars[inventory_hostname]['ssl_exporter_package'] }}"
-      state:
-        "{{ vars['ssl_exporter_package_state'] | default(omit) }}"
-      update_cache: "yes"
-    when:
-      - "hostvars[inventory_hostname]['ansible_pkg_mgr'] == 'yum'"
-  - name: "ssl_exporter | Install the required packages for RedHat via dnf"
-    ansible.builtin.dnf:
-      name: "{{ hostvars[inventory_hostname]['ssl_exporter_package'] }}"
-      state: "{{ vars['ssl_exporter_package_state'] | default(omit) }}"
-      update_cache: "yes"
-    when:
-      - "hostvars[inventory_hostname]['ansible_pkg_mgr'] == 'dnf'"
+  ansible.builtin.dnf:
+    name: "{{ ssl_exporter_pacakges_variant }}"
+    state: "{{ vars['ssl_exporter_package_state'] | default(omit) }}"
+    update_cache: "yes"
   when:
     - "hostvars[inventory_hostname]['ansible_os_family'] == 'RedHat'"
 - name: "ssl_exporter | Install the required packages in Debian derivatives"
   ansible.builtin.apt:
-    name: "{{ hostvars[inventory_hostname]['ssl_exporter_package'] }}"
+    name: "{{ ssl_exporter_pacakges_variant }}"
     state: "{{ vars['ssl_exporter_package_state'] | default(omit) }}"
     update_cache: "yes"
   when:
     - "hostvars[inventory_hostname]['ansible_os_family'] == 'Debian'"
-- name: "ssl_exporter | Install the required packages in ArchLinux
-    derivatives"
+- name: "ssl_exporter | Install the required packages in ArchLinux derivatives"
   community.general.pacman:
-    name: "{{ hostvars[inventory_hostname]['ssl_exporter_package'] }}"
+    name: "{{ ssl_exporter_pacakges_variant }}"
     state: "{{ vars['ssl_exporter_package_state'] | default(omit) }}"
     update_cache: "yes"
   when:

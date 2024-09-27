@@ -1,5 +1,4 @@
 ---
-ssl_exporter_dest: '/opt/ssl_exporter'
-ssl_exporter_service: 'ssl_exporter'
+ssl_exporter_dest: []
 ssl_exporter_url: 'https://github.com/ribbybibby/ssl_exporter/releases/download'
 ssl_exporter_arch: 'linux_amd64'

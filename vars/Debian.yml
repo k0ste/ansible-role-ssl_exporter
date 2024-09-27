@@ -1,4 +1,9 @@
 ---
-ssl_exporter_package:
+ssl_exporter_dest: '/opt/ssl_exporter'
+ssl_exporter_conf_dest: '/etc/prometheus'
+ssl_exporter_bin: '/usr/bin/ssl_exporter'
+ssl_exporter_service: 'ssl_exporter'
+ssl_exporter_package: 'ssl_exporter'
+ssl_exporter_packages_deps:
   - 'unzip'
   - 'tar'

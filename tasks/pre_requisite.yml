@@ -1,9 +1,9 @@
 ---
 - name: "ssl_exporter | Assert that system manager is systemd"
-  assert:
+  ansible.builtin.assert:
     that:
       - "hostvars[inventory_hostname]['ansible_service_mgr'] == 'systemd'"
-    msg: "System manager is not systemd"
+    fail_msg: "System manager is not systemd"
     quiet: "true"
 - name: "ssl_exporter | Add the OS specific varibles"
   ansible.builtin.include_vars:
@@ -12,27 +12,95 @@
   ansible.builtin.set_fact:
     ssl_exporter_version: "{{ hostvars[inventory_hostname]['ssl_exporter'] |
       community.general.json_query('[].version | [0]') | default(omit) }}"
+    ssl_exporter_options: "{{ hostvars[inventory_hostname]['ssl_exporter'] |
+      community.general.json_query('[].options | [0]') | default(omit) }}"
     ssl_exporter_settings: "{{ hostvars[inventory_hostname]['ssl_exporter'] |
       community.general.json_query('[].settings[] | [0]') | default(omit) }}"
+    ssl_exporter_package_state:
+      "{{ hostvars[inventory_hostname]['ssl_exporter'] |
+      community.general.json_query('[].package_state | [0]') | default(omit) }}"
+- name: "ssl_exporter | Assert that ssl_exporter package state in valid value"
+  ansible.builtin.assert:
+    that:
+      - "vars['ssl_exporter_package_state'] in ['present', 'latest']"
+    fail_msg: "{{ 'package_state must be in `present` or `latest`,
+      current is: ' + vars['ssl_exporter_package_state'] }}"
+    quiet: "true"
+  when:
+    - "vars['ssl_exporter_package_state'] is defined"
+    - "vars['ssl_exporter_package_state'] != []"
+    - "vars['ssl_exporter_package_state'] != ''"
+- name: "ssl_exporter | Set package state to 'present' cause value is not
+    defined"
+  ansible.builtin.set_fact:
+    ssl_exporter_package_state: "present"
+  when:
+    - "vars['ssl_exporter_package_state'] is defined"
+    - "vars['ssl_exporter_package_state'] == ''"
 - name: "ssl_exporter | Get last release version from Github"
   community.general.github_release:
     user: "ribbybibby"
     repo: "ssl_exporter"
     action: "latest_release"
-  run_once: "true"
+  run_once: true
   register: "ssl_exporter_version_tag"
   delegate_to: "localhost"
   when:
     - "vars['ssl_exporter_version'] is defined"
     - "vars['ssl_exporter_version'] == 'latest'"
+    - "hostvars[inventory_hostname]['ssl_exporter'] is defined"
+    - "hostvars[inventory_hostname]['ssl_exporter'] != ''"
+    - "hostvars[inventory_hostname]['ssl_exporter'] |
+       community.general.json_query(vars['ssl_exporter_install_package'])
+       is defined"
+    - "hostvars[inventory_hostname]['ssl_exporter'] |
+       community.general.json_query(vars['ssl_exporter_install_package'])
+       == 'false'"
+  vars:
+    ssl_exporter_install_package:
+      "[] | map(&install_package || 'false', @) | [0]"
 - name: "ssl_exporter | Set facts about ssl_exporter role"
   ansible.builtin.set_fact:
-    ssl_exporter_version:
-      "{{ vars['ssl_exporter_version_tag']['tag'][1:] }}"
-- name: "ssl_exporter | Create ssl_exporter catalog"
+    ssl_exporter_package_state: "present"
+    ssl_exporter_version: "{{ vars['ssl_exporter_version_tag']['tag'][1:] }}"
+  when:
+    - "vars['ssl_exporter_version_tag'] is defined"
+    - "not vars['ssl_exporter_version_tag']['skipped']"
+- name: "ssl_exporter | Create ssl_exporter catalog [package deployment]"
   ansible.builtin.file:
-    path: "{{ vars['ssl_exporter_dest'] }}"
+    path: "{{ hostvars[inventory_hostname]['ssl_exporter_conf_dest'] }}"
     state: "directory"
     owner: "root"
     group: "root"
     mode: "0755"
+  when:
+    - "hostvars[inventory_hostname]['ssl_exporter'] is defined"
+    - "hostvars[inventory_hostname]['ssl_exporter'] != ''"
+    - "hostvars[inventory_hostname]['ssl_exporter'] |
+       community.general.json_query(vars['ssl_exporter_install_package'])
+       is defined"
+    - "hostvars[inventory_hostname]['ssl_exporter'] |
+       community.general.json_query(vars['ssl_exporter_install_package'])
+       == 'false'"
+  vars:
+    ssl_exporter_install_package:
+      "[] | map(&install_package || 'false', @) | [0]"
+- name: "ssl_exporter | Create ssl_exporter catalog [not package deployment]"
+  ansible.builtin.file:
+    path: "{{ hostvars[inventory_hostname]['ssl_exporter_dest'] }}"
+    state: "directory"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+  when:
+    - "hostvars[inventory_hostname]['ssl_exporter'] is defined"
+    - "hostvars[inventory_hostname]['ssl_exporter'] != ''"
+    - "hostvars[inventory_hostname]['ssl_exporter'] |
+       community.general.json_query(vars['ssl_exporter_install_package'])
+       is defined"
+    - "hostvars[inventory_hostname]['ssl_exporter'] |
+       community.general.json_query(vars['ssl_exporter_install_package'])
+       == 'false'"
+  vars:
+    ssl_exporter_install_package:
+      "[] | map(&install_package || 'false', @) | [0]"

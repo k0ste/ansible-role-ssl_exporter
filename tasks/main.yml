@@ -1,12 +1,39 @@
 ---
-- ansible.builtin.import_tasks:
+- name: "ssl_exporter | Include pre requisite tasks"
+  ansible.builtin.import_tasks:
     file: "pre_requisite.yml"
-- ansible.builtin.import_tasks:
+- name: "ssl_exporter | Include packages tasks [package deployment]"
+  ansible.builtin.include_tasks:
     file: "packages.yml"
-- ansible.builtin.import_tasks:
-    file: "download.yml"
-- ansible.builtin.include_tasks:
-    file: "deploy_ssl_exporter.yml"
   when:
-    - "vars['ssl_exporter_settings'] is defined"
-    - "vars['ssl_exporter_settings'] != ''"
+    - "hostvars[inventory_hostname]['ssl_exporter'] is defined"
+    - "hostvars[inventory_hostname]['ssl_exporter'] != ''"
+    - "hostvars[inventory_hostname]['ssl_exporter'] |
+       community.general.json_query(vars['ssl_exporter_install_package'])
+       is defined"
+    - "hostvars[inventory_hostname]['ssl_exporter'] |
+       community.general.json_query(vars['ssl_exporter_install_package'])
+       == 'true'"
+  vars:
+    ssl_exporter_install_package:
+      "[] | map(&install_package || 'false', @) | [0]"
+    ssl_exporter_pacakges_variant:
+      "{{ hostvars[inventory_hostname]['ssl_exporter_package'] }}"
+- name: "ssl_exporter | Include packages tasks [not package deployment]"
+  ansible.builtin.include_tasks:
+    file: "download.yml"
+  when:
+    - "hostvars[inventory_hostname]['ssl_exporter'] is defined"
+    - "hostvars[inventory_hostname]['ssl_exporter'] != ''"
+    - "hostvars[inventory_hostname]['ssl_exporter'] |
+       community.general.json_query(vars['ssl_exporter_install_package'])
+       is defined"
+    - "hostvars[inventory_hostname]['ssl_exporter'] |
+       community.general.json_query(vars['ssl_exporter_install_package'])
+       == 'false'"
+  vars:
+    ssl_exporter_install_package:
+      "[] | map(&install_package || 'false', @) | [0]"
+- name: "ssl_exporter | Include deployment tasks"
+  ansible.builtin.import_tasks:
+    file: "deploy.yml"

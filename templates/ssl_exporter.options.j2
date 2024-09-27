@@ -1,52 +1,33 @@
-{{ '## ssl_exporter.service' }}
+{{ '## ssl_exporter' }}
 {{ '# ' + ansible_managed }}
 {{ '# Do not edit manually' }}
 
-{{ '[Unit]' }}
-{{ 'Description=Prometheus SSL exporter' }}
-{{ 'After=network.target network-online.target basic.target' }}
-{{ 'Wants=network-online.target' }}
-{{ 'StartLimitIntervalSec=30' }}
-{{ 'StartLimitBurst=3' }}
-
-{{ '[Service]' }}
-{{ 'Type=simple' }}
-{{ 'Restart=on-failure' }}
-{{ 'RestartSec=30' }}
-{{ 'User=nobody' }}
-{{ 'Group=nobody' }}
-{{ 'ExecStart=' + hostvars[inventory_hostname]['ssl_exporter_dest'] +
-  '/ssl_exporter --config.file=' +
-  hostvars[inventory_hostname]['ssl_exporter_dest'] + '/ssl_exporter.yaml' -}}
 {% if vars['ssl_exporter_options'] is defined and
   vars['ssl_exporter_options'] != '' %}
 {% for s in vars['ssl_exporter_options'] %}
+{% if loop['first'] %}
+{{ 'OPTIONS=\"' -}}
+{% endif %}
 {% if s['web_listen_address'] is defined and s['web_listen_address'] != '' %}
-{{ ' \\' }}
 {{ ' --web.listen-address=' + s['web_listen_address'] -}}
 {% endif %}
 {% if s['web_metrics_path'] is defined and s['web_metrics_path'] != '' %}
-{{ ' \\' }}
 {{ ' --web.metrics-path=' + s['web_metrics_path'] -}}
 {% endif %}
 {% if s['web_probe_path'] is defined and s['web_probe_path'] != '' %}
-{{ ' \\' }}
 {{ ' --web.probe-path=' + s['web_probe_path'] -}}
 {% endif %}
 {% if s['log_level'] is defined and s['log_level'] in ['debug', 'info', 'warn',
-  'error', 'fatal'] %}
-{{ ' \\' }}
+  'error'] %}
 {{ ' --log.level=' + s['log_level'] -}}
 {% endif %}
 {% if s['log_format'] is defined and s['log_format'] in ['logfmt', 'json'] %}
-{{ ' \\' }}
 {{ ' --log.format=' + s['log_format'] -}}
 {% endif %}
 {% if loop['last'] %}
-{{ '' }}
+{{- '\"' }}
 {% endif %}
 {% endfor %}
+{% else %}
+{{ 'OPTIONS=""' }}
 {% endif %}
-
-{{ '[Install]' }}
-{{ 'WantedBy=multi-user.target' }}

@@ -4,14 +4,16 @@
     daemon_reload: "yes"
 - name: "Restart ssl_exporter"
   ansible.builtin.systemd:
-    name: "{{ vars['ssl_exporter_service'] }}"
+    name: "{{ hostvars[inventory_hostname]['ssl_exporter_service'] }}"
     state: "restarted"
   when:
     - "hostvars[inventory_hostname]['ssl_exporter'] is defined"
     - "hostvars[inventory_hostname]['ssl_exporter'] != ''"
     - "hostvars[inventory_hostname]['ssl_exporter'] |
-       community.general.json_query(vars['ssl_exporter_restart']) is defined"
+       community.general.json_query(vars['ssl_exporter_restart']) is
+       defined"
     - "hostvars[inventory_hostname]['ssl_exporter'] |
-       community.general.json_query(vars['ssl_exporter_restart']) == 'true'"
+       community.general.json_query(vars['ssl_exporter_restart']) ==
+       'true'"
   vars:
     ssl_exporter_restart: "[] | map(&restart || 'false', @) | [0]"
