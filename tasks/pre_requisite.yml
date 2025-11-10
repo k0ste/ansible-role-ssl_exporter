@@ -19,6 +19,9 @@
     ssl_exporter_package_state:
       "{{ hostvars[inventory_hostname]['ssl_exporter'] |
       community.general.json_query('[].package_state | [0]') | default(omit) }}"
+  when:
+    - "hostvars[inventory_hostname]['ssl_exporter'] is defined"
+    - "hostvars[inventory_hostname]['ssl_exporter'] not in ['', [], None]"
 - name: "ssl_exporter | Assert that ssl_exporter package state in valid value"
   ansible.builtin.assert:
     that:
@@ -28,15 +31,15 @@
     quiet: "true"
   when:
     - "vars['ssl_exporter_package_state'] is defined"
-    - "vars['ssl_exporter_package_state'] != []"
-    - "vars['ssl_exporter_package_state'] != ''"
+    - "vars['ssl_exporter_package_state'] not in ['', [], None]"
 - name: "ssl_exporter | Set package state to 'present' cause value is not
     defined"
   ansible.builtin.set_fact:
     ssl_exporter_package_state: "present"
   when:
     - "vars['ssl_exporter_package_state'] is defined"
-    - "vars['ssl_exporter_package_state'] == ''"
+    - "(vars['ssl_exporter_package_state'] == '' or
+      vars['ssl_exporter_package_state'] == None)"
 - name: "ssl_exporter | Get last release version from Github"
   community.general.github_release:
     user: "ribbybibby"
@@ -49,7 +52,7 @@
     - "vars['ssl_exporter_version'] is defined"
     - "vars['ssl_exporter_version'] == 'latest'"
     - "hostvars[inventory_hostname]['ssl_exporter'] is defined"
-    - "hostvars[inventory_hostname]['ssl_exporter'] != ''"
+    - "hostvars[inventory_hostname]['ssl_exporter'] not in ['', [], None]"
     - "hostvars[inventory_hostname]['ssl_exporter'] |
        community.general.json_query(vars['ssl_exporter_install_package'])
        is defined"
@@ -75,7 +78,7 @@
     mode: "0755"
   when:
     - "hostvars[inventory_hostname]['ssl_exporter'] is defined"
-    - "hostvars[inventory_hostname]['ssl_exporter'] != ''"
+    - "hostvars[inventory_hostname]['ssl_exporter'] not in ['', [], None]"
     - "hostvars[inventory_hostname]['ssl_exporter'] |
        community.general.json_query(vars['ssl_exporter_install_package'])
        is defined"
@@ -94,7 +97,7 @@
     mode: "0755"
   when:
     - "hostvars[inventory_hostname]['ssl_exporter'] is defined"
-    - "hostvars[inventory_hostname]['ssl_exporter'] != ''"
+    - "hostvars[inventory_hostname]['ssl_exporter'] not in ['', [], None]"
     - "hostvars[inventory_hostname]['ssl_exporter'] |
        community.general.json_query(vars['ssl_exporter_install_package'])
        is defined"

@@ -9,7 +9,7 @@
     mode: "0644"
   when:
     - "hostvars[inventory_hostname]['ssl_exporter'] is defined"
-    - "hostvars[inventory_hostname]['ssl_exporter'] != ''"
+    - "hostvars[inventory_hostname]['ssl_exporter'] not in ['', [], None]"
     - "hostvars[inventory_hostname]['ssl_exporter'] |
        community.general.json_query(vars['ssl_exporter_install_package'])
        is defined"
@@ -31,7 +31,7 @@
     mode: "0644"
   when:
     - "hostvars[inventory_hostname]['ssl_exporter'] is defined"
-    - "hostvars[inventory_hostname]['ssl_exporter'] != ''"
+    - "hostvars[inventory_hostname]['ssl_exporter'] not in ['', [], None]"
     - "hostvars[inventory_hostname]['ssl_exporter'] |
        community.general.json_query(vars['ssl_exporter_install_package'])
        is defined"
@@ -53,7 +53,7 @@
     mode: "0644"
   when:
     - "hostvars[inventory_hostname]['ssl_exporter'] is defined"
-    - "hostvars[inventory_hostname]['ssl_exporter'] != ''"
+    - "hostvars[inventory_hostname]['ssl_exporter'] not in ['', [], None]"
     - "hostvars[inventory_hostname]['ssl_exporter'] |
        community.general.json_query(vars['ssl_exporter_install_package'])
        is defined"
@@ -76,7 +76,7 @@
     mode: "0644"
   when:
     - "hostvars[inventory_hostname]['ssl_exporter'] is defined"
-    - "hostvars[inventory_hostname]['ssl_exporter'] != ''"
+    - "hostvars[inventory_hostname]['ssl_exporter'] not in ['', [], None]"
     - "hostvars[inventory_hostname]['ssl_exporter'] |
        community.general.json_query(vars['ssl_exporter_install_package'])
        is defined"
@@ -95,7 +95,7 @@
     enabled: "yes"
   when:
     - "hostvars[inventory_hostname]['ssl_exporter'] is defined"
-    - "hostvars[inventory_hostname]['ssl_exporter'] != ''"
+    - "hostvars[inventory_hostname]['ssl_exporter'] not in ['', [], None]"
     - "hostvars[inventory_hostname]['ssl_exporter'] |
        community.general.json_query(vars['ssl_exporter_enable']) is defined"
     - "hostvars[inventory_hostname]['ssl_exporter'] |
